@@ -45,7 +45,13 @@ func NewBrokerConfig(address string) (*BrokerConfig, error) {
 	}, nil
 }
 
-func NewClientOptions(brokerCfg *BrokerConfig, tlsCfg *tls.Config, clientID string) *mqtt.ClientOptions {
+func setDefaultHandlers(opts *mqtt.ClientOptions, handler *HandlerMQTT) {
+	opts.OnConnectionLost = handler.OnConnectionLost
+	opts.OnConnect = handler.OnConnect
+	opts.OnReconnecting = handler.OnReconnect
+}
+
+func NewClientOptions(brokerCfg *BrokerConfig, tlsCfg *tls.Config, handler *HandlerMQTT, clientID string) *mqtt.ClientOptions {
 	opts := mqtt.NewClientOptions()
 	opts.SetTLSConfig(tlsCfg)
 
@@ -64,12 +70,7 @@ func NewClientOptions(brokerCfg *BrokerConfig, tlsCfg *tls.Config, clientID stri
 
 	opts.SetConnectRetry(true)
 	opts.SetAutoReconnect(true)
-	// opts.SetBinaryWill()
-	/* handlers stack
-	onConnect - *start fms
-	onReconnect
-	DefaultPublishHandler
-	OnConLost - stop system
-	*/
+
+	setDefaultHandlers(opts, handler)
 	return opts
 }

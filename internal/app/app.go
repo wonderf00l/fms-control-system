@@ -6,5 +6,7 @@ import (
 )
 
 func Run(log *zap.SugaredLogger, cfgFiles *config.CfgFiles) error {
+	// TODO: create client, init connection
+	//
 	return nil
 }

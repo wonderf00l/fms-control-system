@@ -9,7 +9,7 @@ import (
 )
 
 type CfgFiles struct {
-	AppConfig    *config.YAML // will extract 'broker' value
+	AppConfig    *config.YAML
 	BrokerConfig *mqtt.BrokerConfig
 	TLSConfig    *tls.Config
 }
