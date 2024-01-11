@@ -1,0 +1,5 @@
+app:
+  broker:
+    scheme: tls
+    address: mqtt.cloud.yandex.net
+    port: 8083
