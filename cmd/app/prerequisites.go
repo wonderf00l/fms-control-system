@@ -12,9 +12,12 @@ import (
 )
 
 var (
-	envFilePath    = ".env"
-	appConfigPath  = "configs/app.yml"
-	brokerCertPath = "certs/rootCA.crt"
+	envFilePath      = ".env"
+	appConfigPath    = "configs/app.yml"
+	brokerCertFile   = "certs/rootCA.crt"
+	clientCertFile   = "certs/client.crt"
+	clientPrivateKey = "certs/client.key"
+	clientCA         = "self-signed.crt"
 )
 
 var (
@@ -51,8 +54,13 @@ func initPrerequisites() (*zap.SugaredLogger, *config.CfgFiles, error) {
 	}
 
 	cfgFiles, err := config.NewConfigFiles(&config.CfgParameters{
-		AppCfgFilename:    appConfigPath,
-		TLSBrokerCertFile: brokerCertPath,
+		AppCfgFilename: appConfigPath,
+		TLSCfgParams: config.TlsCfgParameters{
+			BrokerCertFile:   brokerCertFile,
+			ClientCertFile:   clientCertFile,
+			ClientPrivateKey: clientPrivateKey,
+			ClientCA:         clientCA,
+		},
 	})
 	if err != nil {
 		return nil, nil, &initPrereqError{err}

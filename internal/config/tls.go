@@ -15,15 +15,15 @@ func (e *TLSConfigError) Error() string {
 	return fmt.Sprintf("TLS config: %s", e.inner.Error())
 }
 
-func NewTLSConfig(brokerCertFile string) (*tls.Config, error) {
+func NewTLSConfig(params TlsCfgParameters) (*tls.Config, error) {
 	rootCAs := x509.NewCertPool()
 	clientCAs := x509.NewCertPool()
 
-	brokerCert, err := os.ReadFile(brokerCertFile)
+	brokerCert, err := os.ReadFile(params.BrokerCertFile)
 	if err != nil {
 		return nil, &TLSConfigError{err}
 	}
-	clientCert, err := os.ReadFile("certs/self-signed.crt")
+	clientCert, err := os.ReadFile(params.ClientCA)
 	if err != nil {
 		return nil, &TLSConfigError{err}
 	}
@@ -31,7 +31,7 @@ func NewTLSConfig(brokerCertFile string) (*tls.Config, error) {
 	rootCAs.AppendCertsFromPEM(brokerCert)
 	clientCAs.AppendCertsFromPEM(clientCert)
 
-	cert, err := tls.LoadX509KeyPair("certs/client.crt", "certs/client.key")
+	cert, err := tls.LoadX509KeyPair(params.ClientCertFile, params.ClientPrivateKey)
 	if err != nil {
 		return nil, &TLSConfigError{err}
 	}

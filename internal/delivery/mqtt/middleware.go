@@ -10,11 +10,14 @@ import (
 
 type Middleware func(mqtt.MessageHandler) mqtt.MessageHandler
 
-func ApplyMiddlewareStack(initialHandler func(mqtt.Client, mqtt.Message)) func(mqtt.Client, mqtt.Message) {
-	return recoverMiddleware(loggingMiddleware(initialHandler))
+func ApplyMiddlewareStack(initialHandler func(mqtt.Client, mqtt.Message), middlewares ...Middleware) func(mqtt.Client, mqtt.Message) {
+	for _, middleware := range middlewares {
+		initialHandler = middleware(initialHandler)
+	}
+	return initialHandler
 }
 
-func loggingMiddleware(next mqtt.MessageHandler) mqtt.MessageHandler {
+func LoggingMiddleware(next mqtt.MessageHandler) mqtt.MessageHandler {
 	return func(client mqtt.Client, msg mqtt.Message) {
 		clientVal, ok := client.(*ClientMQTT)
 
@@ -38,7 +41,7 @@ func loggingMiddleware(next mqtt.MessageHandler) mqtt.MessageHandler {
 	}
 }
 
-func recoverMiddleware(next mqtt.MessageHandler) func(mqtt.Client, mqtt.Message) {
+func RecoverMiddleware(next mqtt.MessageHandler) mqtt.MessageHandler {
 	return func(client mqtt.Client, msg mqtt.Message) {
 		defer func() {
 			if err := recover(); err != nil {

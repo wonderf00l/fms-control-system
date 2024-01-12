@@ -9,7 +9,7 @@ var (
 )
 
 func SetClientRouter(client mqtt.Client, handler *HandlerMQTT) {
-	client.AddRoute(startFmsRoute, ApplyMiddlewareStack(handler.ProcessStartCommand))
-	client.AddRoute(stopFmsRoute, ApplyMiddlewareStack(handler.ProcessStopCommand))
-	client.AddRoute(continueFmsRoute, ApplyMiddlewareStack(handler.ProcessContinueCommand))
+	client.AddRoute(startFmsRoute, ApplyMiddlewareStack(handler.ProcessStartCommand, LoggingMiddleware, RecoverMiddleware))
+	client.AddRoute(stopFmsRoute, ApplyMiddlewareStack(handler.ProcessStartCommand, LoggingMiddleware, RecoverMiddleware))
+	client.AddRoute(continueFmsRoute, ApplyMiddlewareStack(handler.ProcessStartCommand, LoggingMiddleware, RecoverMiddleware))
 }

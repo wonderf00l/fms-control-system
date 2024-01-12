@@ -15,8 +15,15 @@ type CfgFiles struct {
 }
 
 type CfgParameters struct {
-	AppCfgFilename    string
-	TLSBrokerCertFile string
+	AppCfgFilename string
+	TLSCfgParams   TlsCfgParameters
+}
+
+type TlsCfgParameters struct {
+	BrokerCertFile   string
+	ClientCertFile   string
+	ClientPrivateKey string
+	ClientCA         string
 }
 
 type ConfigFilesError struct {
@@ -33,7 +40,7 @@ func NewConfigFiles(params *CfgParameters) (*CfgFiles, error) {
 		return nil, &ConfigFilesError{err}
 	}
 
-	tlsCfg, err := NewTLSConfig(params.TLSBrokerCertFile)
+	tlsCfg, err := NewTLSConfig(params.TLSCfgParams)
 	if err != nil {
 		return nil, &ConfigFilesError{err}
 	}
