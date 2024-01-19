@@ -27,7 +27,7 @@ var (
 	}
 )
 
-func SetSubscribeRouter(client *deliveryMQTT.ClientMQTT, handler *HandlerMQTT, subCtx context.Context) []mqtt.Token {
+func SetSubscribeRouter(subCtx context.Context, client *deliveryMQTT.ClientMQTT, handler *HandlerMQTT) []mqtt.Token {
 	tokens := make([]mqtt.Token, 0, 2)
 
 	tokens = append(tokens,
@@ -35,14 +35,14 @@ func SetSubscribeRouter(client *deliveryMQTT.ClientMQTT, handler *HandlerMQTT, s
 			handler.ProvideWorkpiece,
 			deliveryMQTT.LoggingMiddleware,
 			deliveryMQTT.CheckMsgWithCtxMiddleware,
-			deliveryMQTT.ReplaceMessageClientMiddleware(client, subCtx),
+			deliveryMQTT.ReplaceMessageClientMiddleware(subCtx, client),
 			deliveryMQTT.RecoverMiddleware),
 		),
 		client.Subscribe(acceptWorkpieceReq, 1, deliveryMQTT.ApplyMiddlewareStack(
 			handler.AcceptWorkpiece,
 			deliveryMQTT.LoggingMiddleware,
 			deliveryMQTT.CheckMsgWithCtxMiddleware,
-			deliveryMQTT.ReplaceMessageClientMiddleware(client, subCtx),
+			deliveryMQTT.ReplaceMessageClientMiddleware(subCtx, client),
 			deliveryMQTT.RecoverMiddleware,
 		)))
 

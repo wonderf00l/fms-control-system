@@ -11,8 +11,8 @@ import (
 var _ Storage = (*mockStorage)(nil)
 
 var (
-	maxWorkpieceNum   = 20
-	rawWorkpieces     = 20
+	maxWorkpieceNum   = 1
+	rawWorkpieces     = 1
 	handledWorkpieces = 0
 )
 

@@ -8,26 +8,26 @@ import (
 )
 
 var (
-	requestCmdTopicPrefix  = "/recognition/cmd/request"
-	responseCmdTopicPrefix = "/recognition/cmd/response"
+	requestCmdTopicPrefix  = "/miller/cmd/request"
+	responseCmdTopicPrefix = "/miller/cmd/response"
 )
 
 var (
-	recognizeWorkpieceReq  = requestCmdTopicPrefix + "/recognize"
-	recognizeWorkpieceResp = responseCmdTopicPrefix + "/recognize"
+	hanldeReq  = requestCmdTopicPrefix + "/handle"
+	handleResp = responseCmdTopicPrefix + "/handle"
 
-	pushMetrics = "/recognition/metrics"
+	pushMetrics = "/miller/metrics"
 
 	requestResponseTopics = map[string]string{
-		recognizeWorkpieceReq: recognizeWorkpieceResp,
+		hanldeReq: handleResp,
 	}
 )
 
 func SetSubscribeRouter(subCtx context.Context, client *deliveryMQTT.ClientMQTT, handler *HandlerMQTT) []mqtt.Token {
 	tokens := make([]mqtt.Token, 0, 1)
 
-	tokens = append(tokens, client.Subscribe(recognizeWorkpieceReq, 1, deliveryMQTT.ApplyMiddlewareStack(
-		handler.WorkpieceRecognition,
+	tokens = append(tokens, client.Subscribe(hanldeReq, 1, deliveryMQTT.ApplyMiddlewareStack(
+		handler.HandleWorkpiece,
 		deliveryMQTT.LoggingMiddleware,
 		deliveryMQTT.CheckMsgWithCtxMiddleware,
 		deliveryMQTT.ReplaceMessageClientMiddleware(subCtx, client),

@@ -28,7 +28,7 @@ func ApplyMiddlewareStack(initialHandler mqtt.MessageHandler, middlewares ...Mid
 	return initialHandler
 }
 
-func ReplaceMessageClientMiddleware(customClient *ClientMQTT, ctx context.Context) Middleware {
+func ReplaceMessageClientMiddleware(ctx context.Context, customClient *ClientMQTT) Middleware {
 	return func(next mqtt.MessageHandler) mqtt.MessageHandler {
 		return func(client mqtt.Client, msg mqtt.Message) {
 			customMsg := &MessageWithCtx{Message: msg, ctx: ctx}
