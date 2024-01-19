@@ -1,6 +1,7 @@
 package mqtt
 
 import (
+	"context"
 	"log"
 	"time"
 
@@ -8,21 +9,67 @@ import (
 	"go.uber.org/zap"
 )
 
+var (
+	topicForPanicMiddleware    = "/aux/accidents/panic"
+	retainedForPanicMiddleware = false
+	qosForPanicMiddleware      = 1
+
+	topicForCheckMsgMiddleware    = "/aux/accidents/internals"
+	retainedForCheckMsgMiddleware = false
+	qosForCheckMsgMiddleware      = 1
+)
+
 type Middleware func(mqtt.MessageHandler) mqtt.MessageHandler
 
-func ApplyMiddlewareStack(initialHandler func(mqtt.Client, mqtt.Message), middlewares ...Middleware) func(mqtt.Client, mqtt.Message) {
+func ApplyMiddlewareStack(initialHandler mqtt.MessageHandler, middlewares ...Middleware) mqtt.MessageHandler {
 	for _, middleware := range middlewares {
 		initialHandler = middleware(initialHandler)
 	}
 	return initialHandler
 }
 
+func ReplaceMessageClientMiddleware(customClient *ClientMQTT, ctx context.Context) Middleware {
+	return func(next mqtt.MessageHandler) mqtt.MessageHandler {
+		return func(client mqtt.Client, msg mqtt.Message) {
+			customMsg := &MessageWithCtx{Message: msg, ctx: ctx}
+			next(customClient, customMsg)
+		}
+	}
+}
+
+func CheckMsgWithCtxMiddleware(next mqtt.MessageHandler) mqtt.MessageHandler {
+	return func(client mqtt.Client, msg mqtt.Message) {
+		_, gotClient := client.(*ClientMQTT)
+		if !gotClient {
+			log.Println("Check msg and client middleware: can't extract custom client")
+		}
+
+		_, gotMsg := msg.(*MessageWithCtx)
+		if !gotMsg {
+			log.Println("Check msg and client middleware: can't extract custom message")
+		}
+
+		if !gotClient || !gotMsg {
+			ResponseError(
+				struct{}{},
+				client, msg.Topic(),
+				topicForCheckMsgMiddleware,
+				byte(qosForCheckMsgMiddleware),
+				retainedForCheckMsgMiddleware,
+				&customMsgClientNotFoundError{msg: msg},
+			)
+			return
+		}
+		next(client, msg)
+	}
+}
+
 func LoggingMiddleware(next mqtt.MessageHandler) mqtt.MessageHandler {
 	return func(client mqtt.Client, msg mqtt.Message) {
-		clientVal, ok := client.(*ClientMQTT)
+		customClient, ok := client.(*ClientMQTT)
 
 		if !ok {
-			log.Println("Can't extract client from the interface")
+			log.Println("Logging middleware: can't extract client from the interface")
 			next(client, msg)
 			return
 		}
@@ -30,7 +77,7 @@ func LoggingMiddleware(next mqtt.MessageHandler) mqtt.MessageHandler {
 		start := time.Now()
 		next(client, msg)
 
-		clientVal.Log.Infow(
+		customClient.Log.Infow(
 			"Got message",
 			zap.String("topic", msg.Topic()),
 			zap.Int8("QOS", int8(msg.Qos())),
@@ -45,11 +92,14 @@ func RecoverMiddleware(next mqtt.MessageHandler) mqtt.MessageHandler {
 	return func(client mqtt.Client, msg mqtt.Message) {
 		defer func() {
 			if err := recover(); err != nil {
-				if clientVal, ok := client.(*ClientMQTT); ok {
-					clientVal.Log.Errorln("RECOVER MIDDLEWARE GOT PANIC")
-				} else {
-					log.Println("RECOVER MIDDLEWARE GOT PANIC")
-				}
+				ResponseError(
+					struct{}{},
+					client, msg.Topic(),
+					topicForPanicMiddleware,
+					byte(qosForPanicMiddleware),
+					retainedForPanicMiddleware,
+					&ServiceGotPanicError{msg: msg},
+				)
 			}
 		}()
 

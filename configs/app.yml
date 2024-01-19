@@ -1,5 +1,37 @@
 app:
+  env_file: .env
   broker:
     scheme: tls
     address: mqtt.cloud.yandex.net
-    port: 8083
+    port: 8883
+  clients:
+    storage:
+      ID: storage
+      brokerCA: certs/rootCA.crt
+      clientCA: certs/self-signed.crt
+      cert: certs/storage.crt
+      key: certs/storage.key
+    conveyor:
+      ID: conveyor
+      brokerCA: certs/rootCA.crt
+      clientCA: certs/self-signed.crt
+      cert: certs/conveyor.crt
+      key: certs/conveyor.key
+    recognition:
+      ID: recognition
+      brokerCA: certs/rootCA.crt
+      clientCA: certs/self-signed.crt
+      cert: certs/recognition.crt
+      key: certs/recognition.key
+    lathe:
+      ID: lathe
+      brokerCA: certs/rootCA.crt
+      clientCA: certs/self-signed.crt
+      cert: certs/lathe.crt
+      key: certs/lathe.key
+    miller:
+      ID: miller
+      brokerCA: certs/rootCA.crt
+      clientCA: certs/self-signed.crt
+      cert: certs/miller.crt
+      key: certs/miller.key

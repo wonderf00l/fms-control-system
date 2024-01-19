@@ -2,12 +2,10 @@ package mqtt
 
 import (
 	"crypto/tls"
-	"fmt"
-	"os"
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	yaml "go.uber.org/config"
+	"github.com/wonderf00l/fms-control-system/internal/configs"
 )
 
 var (
@@ -17,41 +15,20 @@ var (
 	_pingTimeout    = 5 * time.Second
 )
 
-type BrokerConfig struct {
-	Address  string
-	Username string
-	Password string
+type DefaultHandlers struct {
+	OnConnect         mqtt.OnConnectHandler
+	OnConnectionLost  mqtt.ConnectionLostHandler
+	OnReconnect       mqtt.ReconnectHandler
+	ConnectionAttempt mqtt.ConnectionAttemptHandler
 }
 
-func BrokerAddress(cfgValue yaml.Value) string {
-	return fmt.Sprintf("%s://%s:%s",
-		cfgValue.Get("scheme").String(),
-		cfgValue.Get("address").String(),
-		cfgValue.Get("port").String(),
-	)
+func setDefaultHandlers(opts *mqtt.ClientOptions, defaultHandlers DefaultHandlers) {
+	opts.OnConnectionLost = defaultHandlers.OnConnectionLost
+	opts.OnConnect = defaultHandlers.OnConnect
+	opts.OnReconnecting = defaultHandlers.OnReconnect
 }
 
-func NewBrokerConfig(address string) (*BrokerConfig, error) {
-	username := os.Getenv("BROKER_USERNAME")
-	password := os.Getenv("BROKER_PASSWORD")
-	if len(username) == 0 || len(password) == 0 {
-		return nil, fmt.Errorf("incorrect .env broker credentials")
-	}
-
-	return &BrokerConfig{
-		Address:  address,
-		Username: username,
-		Password: password,
-	}, nil
-}
-
-func setDefaultHandlers(opts *mqtt.ClientOptions, handler *HandlerMQTT) {
-	opts.OnConnectionLost = handler.OnConnectionLost
-	opts.OnConnect = handler.OnConnect
-	opts.OnReconnecting = handler.OnReconnect
-}
-
-func NewClientOptions(brokerCfg *BrokerConfig, tlsCfg *tls.Config, handler *HandlerMQTT, clientID string) *mqtt.ClientOptions {
+func NewClientOptions(brokerCfg *configs.BrokerConfig, tlsCfg *tls.Config, defaultHandlers DefaultHandlers, clientID string) *mqtt.ClientOptions {
 	opts := mqtt.NewClientOptions()
 	opts.SetTLSConfig(tlsCfg)
 
@@ -71,6 +48,6 @@ func NewClientOptions(brokerCfg *BrokerConfig, tlsCfg *tls.Config, handler *Hand
 	opts.SetConnectRetry(true)
 	opts.SetAutoReconnect(true)
 
-	setDefaultHandlers(opts, handler)
+	setDefaultHandlers(opts, defaultHandlers)
 	return opts
 }
