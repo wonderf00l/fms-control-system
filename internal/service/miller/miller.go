@@ -29,7 +29,7 @@ func (m *service) HandleWorkpiece(ctx context.Context) error {
 		return err
 	}
 
-	location, err := m.pool.Conveyor.GetWorkpieceLocation(ctx)
+	location, err := m.pool.Conveyor.IsReady(ctx)
 	if err != nil {
 		return err
 	}

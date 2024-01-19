@@ -6,15 +6,24 @@ import (
 	"github.com/wonderf00l/fms-control-system/internal/errors"
 )
 
-type invalidDistanceError struct {
-	service  errors.ServiceName
-	distance int
+type invalidLocationError struct {
+	location WorkpieceLocation
 }
 
-func (e *invalidDistanceError) Error() string {
-	return fmt.Sprintf("Service %q: invalid distance %d", e.service, e.distance)
+func (e *invalidLocationError) Error() string {
+	return fmt.Sprintf("Conveyor: invalid location: X - %d, Y - %d", e.location.X, e.location.Y)
 }
 
-func (e *invalidDistanceError) Type() errors.ErrorType {
+func (e *invalidLocationError) Type() errors.ErrorType {
 	return errors.ErrInvalidInput
+}
+
+type workpieceNotOnConveyorError struct{}
+
+func (e *workpieceNotOnConveyorError) Error() string {
+	return "workpiece is not on the conveyor"
+}
+
+func (e *workpieceNotOnConveyorError) Type() errors.ErrorType {
+	return errors.ErrInavlidStateForCMD
 }

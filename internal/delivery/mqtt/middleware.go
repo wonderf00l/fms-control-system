@@ -98,7 +98,7 @@ func RecoverMiddleware(next mqtt.MessageHandler) mqtt.MessageHandler {
 					topicForPanicMiddleware,
 					byte(qosForPanicMiddleware),
 					retainedForPanicMiddleware,
-					&ServiceGotPanicError{msg: msg},
+					&serviceGotPanicError{msg: msg},
 				)
 			}
 		}()

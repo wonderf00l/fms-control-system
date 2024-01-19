@@ -36,7 +36,7 @@ func (c *ClientMQTT) Publish(topic string, qos byte, retained bool, payload inte
 	return token
 }
 
-func CheckConnect(ctx context.Context, token mqtt.Token, service string, log *zap.SugaredLogger, wg *sync.WaitGroup, errCh chan<- struct{}) {
+func CheckMQTTToken(ctx context.Context, token mqtt.Token, msg string, log *zap.SugaredLogger, wg *sync.WaitGroup, errCh chan<- struct{}) {
 	defer wg.Done()
 	select {
 	case <-token.Done():
@@ -44,6 +44,6 @@ func CheckConnect(ctx context.Context, token mqtt.Token, service string, log *za
 			errCh <- struct{}{}
 		}
 	case <-ctx.Done():
-		log.Warnf("Service %s terminating before connection establishment", service)
+		log.Warnf("%s: OS signal was received before token release", msg)
 	}
 }

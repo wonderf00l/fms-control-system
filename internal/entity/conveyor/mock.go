@@ -11,8 +11,8 @@ import (
 var _ Conveyor = (*mockConveyor)(nil)
 
 var (
-	maxHorizontal = 50
-	maxVertical   = 50
+	maxX = 50
+	maxY = 50
 )
 
 type mockConveyor struct {
@@ -25,48 +25,33 @@ func NewConveyor() *mockConveyor {
 	return &mockConveyor{}
 }
 
-func (c *mockConveyor) IsReady(ctx context.Context) error {
+func (c *mockConveyor) IsReady(ctx context.Context) (*WorkpieceLocation, error) {
 	switch rand.Intn(5000) {
 	case 0:
-		return &errors.ServiceOfflineError{Service: errors.Conveyor}
-	case 1:
-		return &errors.ServiceNotReadyError{Service: errors.Conveyor}
-	case 2:
-		return &errors.TimeoutExceededError{Service: errors.Conveyor}
+		return nil, &errors.TimeoutExceededError{Service: errors.Conveyor}
 	default:
-		return nil
+		return &c.workpieceLocation, nil
 	}
 }
 
-func (c *mockConveyor) MoveWorkpieceHorisontal(ctx context.Context, distance int) error {
+func (c *mockConveyor) SetWorkpieceLocation(ctx context.Context, location WorkpieceLocation, fromStorage bool) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	if c.workpieceLocation.X+distance > maxHorizontal || c.workpieceLocation.Y-distance < 0 {
-		return &invalidDistanceError{service: errors.Conveyor, distance: distance}
+	if !fromStorage && c.workpieceLocation.X == 0 && c.workpieceLocation.Y == 0 {
+		return &workpieceNotOnConveyorError{}
 	}
-	c.workpieceLocation.Y += distance
-	return nil
-}
-
-func (c *mockConveyor) MoveWorkpieceVertical(ctx context.Context, distance int) error {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	if c.workpieceLocation.Y+distance > maxVertical || c.workpieceLocation.Y+distance < 0 {
-		return &invalidDistanceError{service: errors.Conveyor, distance: distance}
-
+	if location.X > maxX || location.X < 0 || location.Y > maxY || location.Y < 0 {
+		return &invalidLocationError{location: location}
 	}
-	c.workpieceLocation.X += distance
+	c.workpieceLocation.X = location.X
+	c.workpieceLocation.Y = location.Y
 	return nil
-}
-
-func (c *mockConveyor) GetWorkpieceLocation(ctx context.Context) (*WorkpieceLocation, error) {
-	return &c.workpieceLocation, nil
 }
 
 func (c *mockConveyor) Metrics(ctx context.Context) (*Metrics, error) {
-	err := c.IsReady(ctx)
+	location, err := c.IsReady(ctx)
 	return &Metrics{
 		Ready:             err == nil,
-		WorkpieceLocation: c.workpieceLocation,
+		WorkpieceLocation: location,
 	}, nil
 }

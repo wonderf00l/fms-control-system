@@ -16,7 +16,6 @@ type Service interface {
 	MoveWorkpieceToLathe(context.Context) error
 	MoveWorkpieceToMiller(context.Context) error
 	MoveWorkpieceToStorage(context.Context) error
-	GetWorkpieceLocation(context.Context) (any, error)
 	GetMetrics(context.Context) (*conveyor.Metrics, error)
 }
 
@@ -30,62 +29,55 @@ func NewService(log *zap.SugaredLogger, pool *entity.Pool) *service {
 }
 
 func (c *service) MoveWorkpieceToRecognition(ctx context.Context) error {
-	if err := c.pool.Conveyor.IsReady(ctx); err != nil {
+	if _, err := c.pool.Conveyor.IsReady(ctx); err != nil {
 		return err
 	}
 	if err := c.pool.Recognition.IsReady(ctx); err != nil {
 		return &errors.DepsNotReadyError{Service: errors.Conveyor, Dependency: errors.Recognition, Reason: err}
 	}
-	return c.pool.Conveyor.MoveWorkpieceVertical(ctx, toRecognitionVerticalDistance)
+	return c.pool.Conveyor.SetWorkpieceLocation(ctx, conveyor.WorkpieceLocation{
+		X: locationForRecognitionX,
+		Y: locationForRecognitionY,
+	}, false)
 }
 
 func (c *service) MoveWorkpieceToLathe(ctx context.Context) error {
-	if err := c.pool.Conveyor.IsReady(ctx); err != nil {
+	if _, err := c.pool.Conveyor.IsReady(ctx); err != nil {
 		return err
 	}
 	if err := c.pool.Lathe.IsReady(ctx); err != nil {
 		return &errors.DepsNotReadyError{Service: errors.Conveyor, Dependency: errors.Lathe, Reason: err}
 	}
-	if err := c.pool.Conveyor.MoveWorkpieceVertical(ctx, toLatheVerticalDistance); err != nil {
-		return err
-	}
-	if err := c.pool.Conveyor.MoveWorkpieceHorisontal(ctx, toLatheHorizontalDistance); err != nil {
-		return err
-	}
-	return nil
+	return c.pool.Conveyor.SetWorkpieceLocation(ctx, conveyor.WorkpieceLocation{
+		X: locationForLatheX,
+		Y: locationForLatheY,
+	}, false)
 }
 
 func (c *service) MoveWorkpieceToMiller(ctx context.Context) error {
-	if err := c.pool.Conveyor.IsReady(ctx); err != nil {
+	if _, err := c.pool.Conveyor.IsReady(ctx); err != nil {
 		return err
 	}
 	if err := c.pool.Miller.IsReady(ctx); err != nil {
 		return &errors.DepsNotReadyError{Service: errors.Conveyor, Dependency: errors.Miller, Reason: err}
 	}
-	if err := c.pool.Conveyor.MoveWorkpieceHorisontal(ctx, toMillerHorizontalDistance); err != nil {
-		return err
-	}
-	return nil
+	return c.pool.Conveyor.SetWorkpieceLocation(ctx, conveyor.WorkpieceLocation{
+		X: locationForMillerX,
+		Y: locationForMillerY,
+	}, false)
 }
 
 func (c *service) MoveWorkpieceToStorage(ctx context.Context) error {
-	if err := c.pool.Conveyor.IsReady(ctx); err != nil {
+	if _, err := c.pool.Conveyor.IsReady(ctx); err != nil {
 		return err
 	}
 	if err := c.pool.Storage.IsReady(ctx); err != nil {
 		return &errors.DepsNotReadyError{Service: errors.Conveyor, Dependency: errors.Storage, Reason: err}
 	}
-	if err := c.pool.Conveyor.MoveWorkpieceVertical(ctx, toStorageVerticalDistance); err != nil {
-		return err
-	}
-	if err := c.pool.Conveyor.MoveWorkpieceHorisontal(ctx, toStorageHotizontalDistance); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (c *service) GetWorkpieceLocation(ctx context.Context) (any, error) {
-	return c.pool.Conveyor.GetWorkpieceLocation(ctx)
+	return c.pool.Conveyor.SetWorkpieceLocation(ctx, conveyor.WorkpieceLocation{
+		X: locationForStorageX,
+		Y: locationForStorageY,
+	}, false)
 }
 
 func (c *service) GetMetrics(ctx context.Context) (*conveyor.Metrics, error) {

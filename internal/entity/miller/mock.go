@@ -18,10 +18,6 @@ func NewMiller() *mockMiller {
 func (m *mockMiller) IsReady(ctx context.Context) error {
 	switch rand.Intn(5000) {
 	case 0:
-		return &errors.ServiceOfflineError{Service: errors.Miller}
-	case 1:
-		return &errors.ServiceNotReadyError{Service: errors.Miller}
-	case 2:
 		return &errors.TimeoutExceededError{Service: errors.Miller}
 	default:
 		return nil
@@ -33,8 +29,7 @@ func (m *mockMiller) HandleWorkpiece(ctx context.Context) error {
 }
 
 func (m *mockMiller) Metrics(ctx context.Context) (*Metrics, error) {
-	err := m.IsReady(ctx)
 	return &Metrics{
-		Ready: err == nil,
+		Ready: m.IsReady(ctx) == nil,
 	}, nil
 }

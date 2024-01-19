@@ -29,7 +29,7 @@ func (r *service) RecognizeWorkpiece(ctx context.Context) (recognition.Workpiece
 		return recognition.Unknown, err
 	}
 
-	location, err := r.pool.Conveyor.GetWorkpieceLocation(ctx)
+	location, err := r.pool.Conveyor.IsReady(ctx)
 	if err != nil {
 		return recognition.Unknown, err
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/wonderf00l/fms-control-system/internal/entity"
+	"github.com/wonderf00l/fms-control-system/internal/entity/conveyor"
 	storage "github.com/wonderf00l/fms-control-system/internal/entity/storage"
 	"github.com/wonderf00l/fms-control-system/internal/errors"
 	"go.uber.org/zap"
@@ -30,20 +31,32 @@ func (s *service) ProvideWorkpiece(ctx context.Context) error {
 	if err := s.pool.Storage.IsReady(ctx); err != nil {
 		return err
 	}
-	if err := s.pool.Conveyor.IsReady(ctx); err != nil {
+	if _, err := s.pool.Conveyor.IsReady(ctx); err != nil {
 		return &errors.DepsNotReadyError{Service: errors.Storage, Dependency: errors.Conveyor, Reason: err}
 	}
-	return s.pool.Storage.ProvideRawWorkpiece(ctx)
+	if err := s.pool.Storage.ProvideRawWorkpiece(ctx); err != nil {
+		return err
+	}
+	if err := s.pool.Conveyor.SetWorkpieceLocation(ctx, conveyor.WorkpieceLocation{X: 0, Y: 1}, true); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *service) AcceptWorkpiece(ctx context.Context) error {
 	if err := s.pool.Storage.IsReady(ctx); err != nil {
 		return err
 	}
-	if err := s.pool.Conveyor.IsReady(ctx); err != nil {
+	if _, err := s.pool.Conveyor.IsReady(ctx); err != nil {
 		return &errors.DepsNotReadyError{Service: errors.Storage, Dependency: errors.Conveyor, Reason: err}
 	}
-	return s.pool.Storage.AcceptFinishedWorkpiece(ctx)
+	if err := s.pool.Storage.AcceptFinishedWorkpiece(ctx); err != nil {
+		return err
+	}
+	if err := s.pool.Conveyor.SetWorkpieceLocation(ctx, conveyor.WorkpieceLocation{X: 0, Y: 0}, true); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *service) GetMetrics(ctx context.Context) (*storage.Metrics, error) {

@@ -10,13 +10,10 @@ type Metrics struct {
 type WorkpieceLocation struct {
 	X int
 	Y int
-	Z int
 }
 
 type Conveyor interface {
-	IsReady(context.Context) error
-	MoveWorkpieceHorisontal(context.Context, int) error
-	MoveWorkpieceVertical(context.Context, int) error
-	GetWorkpieceLocation(context.Context) (*WorkpieceLocation, error)
+	IsReady(context.Context) (*WorkpieceLocation, error)
+	SetWorkpieceLocation(context.Context, WorkpieceLocation, bool) error
 	Metrics(context.Context) (*Metrics, error)
 }

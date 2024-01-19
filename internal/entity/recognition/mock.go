@@ -9,9 +9,7 @@ import (
 
 var _ Recognition = (*mockRecognition)(nil)
 
-type mockRecognition struct {
-	workpieceType WorkpieceType
-}
+type mockRecognition struct{}
 
 func NewRecognition() *mockRecognition {
 	return &mockRecognition{}
@@ -20,10 +18,6 @@ func NewRecognition() *mockRecognition {
 func (r *mockRecognition) IsReady(context.Context) error {
 	switch rand.Intn(5000) {
 	case 0:
-		return &errors.ServiceOfflineError{Service: errors.Recognition}
-	case 1:
-		return &errors.ServiceNotReadyError{Service: errors.Recognition}
-	case 2:
 		return &errors.TimeoutExceededError{Service: errors.Recognition}
 	default:
 		return nil
@@ -35,9 +29,7 @@ func (r *mockRecognition) Recognize(ctx context.Context) (WorkpieceType, error) 
 }
 
 func (r *mockRecognition) Metrics(ctx context.Context) (*Metrics, error) {
-	err := r.IsReady(ctx)
 	return &Metrics{
-		Ready:         err == nil,
-		WorkpieceType: r.workpieceType,
+		Ready: r.IsReady(ctx) == nil,
 	}, nil
 }

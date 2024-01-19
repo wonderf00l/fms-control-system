@@ -32,12 +32,8 @@ func (h *HandlerMQTT) ProvideWorkpiece(client mqtt.Client, msg mqtt.Message) {
 
 	if err := h.Service.ProvideWorkpiece(ctx); err != nil {
 		deliveryMQTT.ResponseError(h.log, client, reqTopic, respTopic, 1, false, err)
-		return
-	}
-
-	if err := deliveryMQTT.ResponseOk(h.log, client, reqTopic, respTopic, 1, false, "storage has provided workpiece successfully", nil); err != nil {
+	} else if err := deliveryMQTT.ResponseOk(h.log, client, reqTopic, respTopic, 1, false, "storage has provided workpiece successfully", nil); err != nil {
 		deliveryMQTT.ResponseError(h.log, client, reqTopic, respTopic, 1, false, err)
-		return
 	}
 }
 
@@ -52,23 +48,15 @@ func (h *HandlerMQTT) AcceptWorkpiece(client mqtt.Client, msg mqtt.Message) {
 
 	if err := h.Service.AcceptWorkpiece(ctx); err != nil {
 		deliveryMQTT.ResponseError(h.log, client, reqTopic, respTopic, 1, false, err)
-		return
-	}
-
-	if err := deliveryMQTT.ResponseOk(h.log, client, reqTopic, respTopic, 1, false, "storage has accepted workpiece successfully", nil); err != nil {
+	} else if err := deliveryMQTT.ResponseOk(h.log, client, reqTopic, respTopic, 1, false, "storage has accepted workpiece successfully", nil); err != nil {
 		deliveryMQTT.ResponseError(h.log, client, reqTopic, respTopic, 1, false, err)
-		return
 	}
 }
 
 func (h *HandlerMQTT) PushMetrics(ctx context.Context, client mqtt.Client) {
-	metrics, err := h.Service.GetMetrics(ctx)
-	if err != nil {
+	if metrics, err := h.Service.GetMetrics(ctx); err != nil {
 		deliveryMQTT.ResponseError(h.log, client, *new(string), pushMetrics, 1, false, err)
-		return
-	}
-	if err := deliveryMQTT.ResponseOk(h.log, client, *new(string), pushMetrics, 1, true, "got storage metrics sucessfully", metrics); err != nil {
+	} else if err := deliveryMQTT.ResponseOk(h.log, client, *new(string), pushMetrics, 1, true, "got storage metrics sucessfully", metrics); err != nil {
 		deliveryMQTT.ResponseError(h.log, client, *new(string), pushMetrics, 1, false, err)
-		return
 	}
 }

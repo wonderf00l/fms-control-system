@@ -15,8 +15,7 @@ const (
 )
 
 type Metrics struct {
-	Ready         bool
-	WorkpieceType WorkpieceType
+	Ready bool
 }
 
 type Recognition interface {
