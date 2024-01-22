@@ -48,7 +48,7 @@ func (h *HandlerMQTT) ProvideWorkpieceToLathe(client mqtt.Client, msg mqtt.Messa
 
 	if err = h.Service.MoveWorkpieceToLathe(ctx); err != nil {
 		deliveryMQTT.ResponseError(h.log, client, reqTopic, respTopic, 1, false, err)
-	} else if err = deliveryMQTT.ResponseOk(h.log, client, reqTopic, respTopic, 1, false, "conveyor provided workpiece to the recognition successfully", nil); err != nil {
+	} else if err = deliveryMQTT.ResponseOk(h.log, client, reqTopic, respTopic, 1, false, "conveyor provided workpiece to the lathe successfully", nil); err != nil {
 		deliveryMQTT.ResponseError(h.log, client, reqTopic, respTopic, 1, false, err)
 	}
 }
@@ -64,7 +64,7 @@ func (h *HandlerMQTT) ProvideWorkpieceToMiller(client mqtt.Client, msg mqtt.Mess
 
 	if err = h.Service.MoveWorkpieceToMiller(ctx); err != nil {
 		deliveryMQTT.ResponseError(h.log, client, reqTopic, respTopic, 1, false, err)
-	} else if err = deliveryMQTT.ResponseOk(h.log, client, reqTopic, respTopic, 1, false, "conveyor provided workpiece to the recognition successfully", nil); err != nil {
+	} else if err = deliveryMQTT.ResponseOk(h.log, client, reqTopic, respTopic, 1, false, "conveyor provided workpiece to the miller successfully", nil); err != nil {
 		deliveryMQTT.ResponseError(h.log, client, reqTopic, respTopic, 1, false, err)
 	}
 }

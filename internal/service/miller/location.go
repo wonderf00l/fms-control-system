@@ -1,6 +1,6 @@
 package miller
 
 var (
-	locationForMillerX = 50
+	locationForMillerX = 0
 	locationForMillerY = 50
 )

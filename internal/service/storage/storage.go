@@ -37,7 +37,7 @@ func (s *service) ProvideWorkpiece(ctx context.Context) error {
 	if err := s.pool.Storage.ProvideRawWorkpiece(ctx); err != nil {
 		return err
 	}
-	if err := s.pool.Conveyor.SetWorkpieceLocation(ctx, conveyor.WorkpieceLocation{X: 0, Y: 1}, true); err != nil {
+	if err := s.pool.Conveyor.SetWorkpieceLocation(ctx, conveyor.WorkpieceLocation{X: 1, Y: 0}, true); err != nil {
 		return err
 	}
 	return nil
