@@ -4,10 +4,10 @@ var (
 	locationForRecognitionX = 0
 	locationForRecognitionY = 25
 
-	locationForLatheX = 10
+	locationForLatheX = 50
 	locationForLatheY = 50
 
-	locationForMillerX = 50
+	locationForMillerX = 0
 	locationForMillerY = 50
 
 	locationForStorageX = 0

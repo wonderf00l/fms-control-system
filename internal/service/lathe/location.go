@@ -1,6 +1,6 @@
 package lathe
 
 var (
-	locationForLatheX = 10
+	locationForLatheX = 50
 	locationForLatheY = 50
 )
