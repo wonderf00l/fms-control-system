@@ -35,10 +35,6 @@ func NewStorage() *mockStorage {
 func (s *mockStorage) IsReady(ctx context.Context) error {
 	switch rand.Intn(5000) {
 	case 0:
-		return &errors.ServiceOfflineError{Service: errors.Storage}
-	case 1:
-		return &errors.ServiceNotReadyError{Service: errors.Storage}
-	case 2:
 		return &errors.TimeoutExceededError{Service: errors.Storage}
 	default:
 		return nil

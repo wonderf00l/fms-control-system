@@ -1,4 +1,4 @@
-package recognition
+package conveyor
 
 import (
 	"context"

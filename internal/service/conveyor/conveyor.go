@@ -12,9 +12,9 @@ import (
 var _ Service = (*service)(nil)
 
 type Service interface {
-	MoveWorkpieceToRecognition(context.Context) error
 	MoveWorkpieceToLathe(context.Context) error
 	MoveWorkpieceToMiller(context.Context) error
+	MoveWorkpieceToRecognition(context.Context) error
 	MoveWorkpieceToStorage(context.Context) error
 	GetMetrics(context.Context) (*conveyor.Metrics, error)
 }
